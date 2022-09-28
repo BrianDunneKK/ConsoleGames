@@ -4,13 +4,23 @@ from ConsoleGame import *
 
 class Wordle(cdkkConsoleGame):
     def init(self):
+        # wordlist.txt contains the most common 5000 words
+        # The chosen word comes from ths list
+        with open("wordlist.txt") as f:
+            all_words = f.read().splitlines()
         self._word_options = []
-        with open("wordlist.csv", newline='') as f:
-            csv_rdr = csv.reader(f)
-            for row in csv_rdr:
-                word =  row[0]
-                if (len(word) == self.get_config("letters")):
-                    self._word_options.append(word.upper())
+        for word in all_words:
+            if (len(word) == self.get_config("letters")):
+                self._word_options.append(word.upper())
+
+        # wordlist#.txt contains all words with # letters (#=3-9)
+        # Users can enter any word on this list
+        with open(f"wordlist{self.get_config('letters')}.txt") as f:
+            all_words = f.read().splitlines()
+        self._allowed_words = []
+        for word in all_words:
+            self._allowed_words.append(word.upper())
+
         return True
 
     def start_game(self):
@@ -22,7 +32,7 @@ class Wordle(cdkkConsoleGame):
 
     def process_input(self):
         self.user_input = self.user_input.upper()
-        if (len(self.user_input) != self.get_config("letters")) or (self.user_input not in self._word_options):
+        if (len(self.user_input) != self.get_config("letters")) or (self.user_input not in self._allowed_words):
             self.print(f"Please enter a valid {self.get_config('letters')}-letter word!!\n")
             return False
         else:

@@ -30,7 +30,7 @@ def check_guess(guess, answer):
 # -----
 
 word_options = []
-with open("wordlist.csv", newline='') as f:
+with open("wordlist.txt", newline='') as f:
     csv_rdr = csv.reader(f)
     for row in csv_rdr:
         word =  row[0]
