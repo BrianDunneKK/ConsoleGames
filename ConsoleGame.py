@@ -1,11 +1,13 @@
 from rich import print as rprint
 from rich.prompt import Prompt
+from rich.console import Console
 
 class cdkkPrompt(Prompt):
     prompt_suffix = ""
 
 class cdkkConsole:
     default_config = {}
+    console = Console()
 
     def __init__(self, config=None):
         super().__init__()
@@ -27,7 +29,8 @@ class cdkkConsole:
                     self.set_config(key, value)
 
     def print(self, *args, **kwargs):
-        rprint(*args, **kwargs)
+        cdkkConsole.console.print(*args, **kwargs, highlight = False)
+        # rprint(*args, **kwargs)
 
 
 class cdkkConsoleGame(cdkkConsole):
@@ -41,7 +44,6 @@ class cdkkConsoleGame(cdkkConsole):
         self._config = {}
         self.update_config(cdkkConsoleGame.default_config)
         self.update_config(config)
-
 
     def init(self):
         # Return True if initialised OK
@@ -60,7 +62,7 @@ class cdkkConsoleGame(cdkkConsole):
     def update(self):
         pass
 
-    def display(self):
+    def display(self, first_time = False):
         pass
 
     def check_if_game_over(self):
@@ -86,7 +88,7 @@ class cdkkConsoleGame(cdkkConsole):
 
         if self._game_on:
             self.start_game()
-            self.display()
+            self.display(first_time = True)
 
         while self._game_on:
             while True:
@@ -95,13 +97,13 @@ class cdkkConsoleGame(cdkkConsole):
                     break
 
             self.update()
-            self.display()
+            self.display(first_time = False)
             if self.check_if_game_over():
                 self.end_game()
                 self._game_on = self.check_if_play_again() 
                 if self._game_on:
                     # Play again
                     self.start_game()
-                    self.display()
+                    self.display(first_time = False)
 
         self.exit_game()

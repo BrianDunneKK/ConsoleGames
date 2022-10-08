@@ -51,7 +51,7 @@ class Wordle(cdkkConsoleGame):
         self._guesses.append(self.user_input)
         self._guesses_coloured.append(coloured)
 
-    def display(self):
+    def display(self, first_time = False):
         self.print(*self._guesses_coloured, sep="\n")
         self.print("")
 
