@@ -4,6 +4,9 @@ from ConsoleGame import *
 
 class Wordle(cdkkConsoleGame):
     def init(self):
+        self.input_pattern = f"^[a-zA-Z]{{{self.get_config('letters')}}}$"
+        self.input_error = f"Please enter a valid {self.get_config('letters')}-letter word.\n"
+
         # wordlist.txt contains the most common 5000 words
         # The chosen word comes from ths list
         with open("wordlist.txt") as f:
@@ -32,8 +35,11 @@ class Wordle(cdkkConsoleGame):
 
     def process_input(self):
         self.user_input = self.user_input.upper()
-        if (len(self.user_input) != self.get_config("letters")) or (self.user_input not in self._allowed_words):
-            self.print(f"Please enter a valid {self.get_config('letters')}-letter word!!\n")
+        return super().process_input()
+
+    def valid_input(self):
+        if (self.user_input not in self._allowed_words):
+            self.print(f"Please enter a valid word!!\n")
             return False
         else:
             return True

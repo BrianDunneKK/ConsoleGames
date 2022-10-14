@@ -5,6 +5,9 @@ from HangmanStages import *
 
 class Hangman(cdkkConsoleGame):
     def init(self):
+        self.input_pattern = "^[a-zA-Z]$"
+        self.input_error = "Please enter one letter.\n"
+
         # wordlist.txt contains the most common 5000 words
         with open("wordlist.txt") as f:
             all_words = f.read().splitlines()
@@ -25,10 +28,10 @@ class Hangman(cdkkConsoleGame):
 
     def process_input(self):
         self.user_input = self.user_input.upper()
-        if len(self.user_input) != 1 or not self.user_input.isalpha():
-            self.print(f"Please enter one letter.\n")
-            return False
-        elif self.user_input in self._letters:
+        return super().process_input()
+
+    def valid_input(self):
+        if self.user_input in self._letters:
             self.print(f"You've used that letter already.\n")
             return False
         else:

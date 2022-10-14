@@ -1,6 +1,9 @@
+# To Do: Add standard inputs: ?, help, exit, quit
+
 from rich import print as rprint
 from rich.prompt import Prompt
 from rich.console import Console
+import re
 
 class cdkkPrompt(Prompt):
     prompt_suffix = ""
@@ -14,6 +17,8 @@ class cdkkConsole:
         self._config = {}
         self.update_config(cdkkConsole.default_config)
         self.update_config(config)
+        self.input_pattern = ""
+        self.input_error = ""
 
     def get_config(self, attribute, default=None):
         return self._config.get(attribute, default)
@@ -56,7 +61,16 @@ class cdkkConsoleGame(cdkkConsole):
         return cdkkPrompt.ask("> ")
 
     def process_input(self):
-        # Return True if input is OK
+        # Return True if input is syntactically OK
+        if self.input_pattern != '':
+            regex_check = re.search(self.input_pattern, self.user_input)
+            if not regex_check and self.input_error != '':
+                self.print(self.input_error)
+            return regex_check
+        return True
+
+    def valid_input(self):
+        # Return True if input is semantically OK
         return True
 
     def update(self):
@@ -94,7 +108,8 @@ class cdkkConsoleGame(cdkkConsole):
             while True:
                 self.user_input = self.read_input()
                 if self.process_input():
-                    break
+                    if self.valid_input():
+                        break
 
             self.update()
             self.display(first_time = False)

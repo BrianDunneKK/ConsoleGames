@@ -6,6 +6,9 @@ class TowerOfHanoi(cdkkConsoleGame):
     styles = ["dark_orange3", "red", "yellow", "blue", "violet", "green"]
 
     def init(self):
+        self.input_pattern = "^[1-3]{2}$"
+        self.input_error = "Please enter two digits.\n"
+
         self.disks = int(self.get_config("disks"))
         self.width = 4
         self.stack_width = 3 + self.disks * self.width
@@ -15,17 +18,12 @@ class TowerOfHanoi(cdkkConsoleGame):
     def start_game(self):
         self.print(f'\n [red]WELCOME[/red] [green]TO[/green] [blue]Tower of Hanoi[/blue] \n')
 
-    def process_input(self):
-        if len(self.user_input) != 2:
-            self.print(f"Please enter two digits\n")
-            return False
-        if not (self.user_input[0].isnumeric() and self.user_input[1].isnumeric()):
-            self.print(f"Please enter two digits\n")
-            return False
+    def valid_input(self):
         self.from_peg = int(self.user_input[0]) -1
         self.to_peg = int(self.user_input[1]) -1
-        if (self.from_peg < 0 or self.from_peg > 2 or self.to_peg < 0 or self.to_peg > 2 or self.from_peg == self.to_peg):
-            self.print(f"Please enter two different digits, each between 1 and 3\n")
+        # if (self.from_peg < 0 or self.from_peg > 2 or self.to_peg < 0 or self.to_peg > 2 or self.from_peg == self.to_peg):
+        if (self.from_peg == self.to_peg):
+            self.print(f"Please enter two different digits.\n")
             return False
         if len(self.pegs[self.from_peg]) == 0:
             self.print(f"There is no disk on peg {self.from_peg+1}\n")
