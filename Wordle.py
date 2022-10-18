@@ -1,35 +1,22 @@
 import csv
 from random import choice
 from ConsoleGame import *
+from Words import *
 
 class Wordle(cdkkConsoleGame):
     def init(self):
+        self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]WORDLE[/blue] \n'
+        self.instructions_str = f"Guess words with {self.get_config('letters')} letters."
         self.input_pattern = f"^[a-zA-Z]{{{self.get_config('letters')}}}$"
         self.input_error = f"Please enter a valid {self.get_config('letters')}-letter word.\n"
-
-        # wordlist.txt contains the most common 5000 words
-        # The chosen word comes from ths list
-        with open("wordlist.txt") as f:
-            all_words = f.read().splitlines()
-        self._word_options = []
-        for word in all_words:
-            if (len(word) == self.get_config("letters")):
-                self._word_options.append(word.upper())
-
-        # wordlist#.txt contains all words with # letters (#=3-9)
-        # Users can enter any word on this list
-        with open(f"wordlist{self.get_config('letters')}.txt") as f:
-            all_words = f.read().splitlines()
-        self._allowed_words = []
-        for word in all_words:
-            self._allowed_words.append(word.upper())
-
+        self._common_words = cdkkWords(word_length = self.get_config("letters"), common_words = True)
+        self._all_words = cdkkWords(word_length = self.get_config("letters"), common_words = False)
         return True
 
     def start_game(self):
-        self.print(f'\n [red]WELCOME[/red] [green]TO[/green] [blue]WORDLE[/blue] \n')
-        self.print(f"You may start guessing words with {self.get_config('letters')} letters.")
-        self._chosen_word = choice(self._word_options)
+        super().start_game()
+        self._chosen_word = self._common_words.random_word()
+        # self._chosen_word = choice(self._word_options)
         self._guesses = []
         self._guesses_coloured = []
 
@@ -38,13 +25,13 @@ class Wordle(cdkkConsoleGame):
         return super().process_input()
 
     def valid_input(self):
-        if (self.user_input not in self._allowed_words):
-            self.print(f"Please enter a valid word!!\n")
-            return False
-        else:
+        if self._all_words.contains_word(self.user_input):
             return True
+        self.print(f"Please enter a valid word!!\n")
+        return False
 
     def update(self):
+        super().update()
         coloured = ""
         for i, letter in enumerate(self.user_input):
             if self._chosen_word[i] == self.user_input[i]:
@@ -67,8 +54,10 @@ class Wordle(cdkkConsoleGame):
     def end_game(self):
         if (self.user_input == self._chosen_word):
             self.print(f"You beat WORDLE {len(self._guesses)}/{self.get_config('guesses')}\n")
+            return True
         else:
             self.print(f"Hard luck ... you used all {self.get_config('guesses')} guesses. Correct Word: {self._chosen_word}\n")
+            return False
 
-game = Wordle({"letters":5, "guesses":6})
+game = Wordle({"letters":5, "guesses":6, "players":1})
 game.execute()

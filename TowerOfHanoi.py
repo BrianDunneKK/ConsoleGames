@@ -1,11 +1,14 @@
 import csv
 from random import choice
+from tkinter.tix import Tree
 from ConsoleGame import *
 
 class TowerOfHanoi(cdkkConsoleGame):
     styles = ["dark_orange3", "red", "yellow", "blue", "violet", "green"]
 
     def init(self):
+        self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]Tower of Hanoi[/blue] \n'
+        self.instructions_str = f"Move all disks to peg 3. Enter the source and destination peg numbers."
         self.input_pattern = "^[1-3]{2}$"
         self.input_error = "Please enter two digits.\n"
 
@@ -16,12 +19,17 @@ class TowerOfHanoi(cdkkConsoleGame):
         return True
 
     def start_game(self):
-        self.print(f'\n [red]WELCOME[/red] [green]TO[/green] [blue]Tower of Hanoi[/blue] \n')
+        super().start_game()
+        self.pegs = [list(range(self.disks, 0, -1)), [], []]
+
+    def process_input(self):
+        if super().process_input():
+            self.from_peg = int(self.user_input[0]) -1
+            self.to_peg = int(self.user_input[1]) -1
+            return True
+        return False
 
     def valid_input(self):
-        self.from_peg = int(self.user_input[0]) -1
-        self.to_peg = int(self.user_input[1]) -1
-        # if (self.from_peg < 0 or self.from_peg > 2 or self.to_peg < 0 or self.to_peg > 2 or self.from_peg == self.to_peg):
         if (self.from_peg == self.to_peg):
             self.print(f"Please enter two different digits.\n")
             return False
@@ -35,6 +43,7 @@ class TowerOfHanoi(cdkkConsoleGame):
         return True
 
     def update(self):
+        super().update()
         disk = self.pegs[self.from_peg].pop()
         self.pegs[self.to_peg].append(disk)
 
@@ -67,7 +76,8 @@ class TowerOfHanoi(cdkkConsoleGame):
         return(len(self.pegs[2]) == self.disks)
 
     def end_game(self):
-        self.print(f"You beat Tower of Hanoi\n")
+        self.print(f"You beat Tower of Hanoi in {self.input_count} steps.\n")
+        return True
 
 game = TowerOfHanoi({"disks":3})
 game.execute()

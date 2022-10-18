@@ -2,26 +2,24 @@ import csv
 from random import choice
 from ConsoleGame import *
 from HangmanStages import *
+from Words import *
+from string import ascii_uppercase
 
 class Hangman(cdkkConsoleGame):
     def init(self):
+        self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]HANGMAN[/blue] \n'
+        self.instructions_str = "Guess one letter at a time."
         self.input_pattern = "^[a-zA-Z]$"
         self.input_error = "Please enter one letter.\n"
-
-        # wordlist.txt contains the most common 5000 words
-        with open("wordlist.txt") as f:
-            all_words = f.read().splitlines()
-        self._word_options = []
-        for word in all_words:
-            if (len(word) == self.get_config("letters")):
-                self._word_options.append(word.upper())
+        self._words = cdkkWords(word_length = self.get_config("letters"), common_words = True)
         return True
 
+    def read_game_config(self):
+        super().read_game_config()
+
     def start_game(self):
-        self.console.clear()
-        self.print(f'\n [red]WELCOME[/red] [green]TO[/green] [blue]HANGMAN[/blue] \n')
-        self.print(f"You may start guessing letters.")
-        self._chosen_word = list(choice(self._word_options).upper())
+        super().start_game()
+        self._chosen_word = list(self._words.random_word())
         self._letters = []
         self._guess = list(" " * len(self._chosen_word))
         self._stage = 0
@@ -34,10 +32,20 @@ class Hangman(cdkkConsoleGame):
         if self.user_input in self._letters:
             self.print(f"You've used that letter already.\n")
             return False
-        else:
-            return True
+        return True
+
+    def calculate_answer(self):
+        # Randomly guess letters, checking that they haven't been used before
+        answer = ''
+        while answer == '':
+            answer = choice(ascii_uppercase)
+            if answer in self._letters:
+                answer = ''
+
+        return answer
 
     def update(self):
+        super().update()
         correct_guess = False
         for i, letter in enumerate(self._chosen_word):
             if letter == self.user_input:
@@ -66,8 +74,13 @@ class Hangman(cdkkConsoleGame):
     def end_game(self):
         if (self._guess == self._chosen_word):
             self.print(f"You beat Hangman in {len(self._letters)} guesses.\n")
+            return True
         else:
             self.print(f"Hard luck ... you lost. Correct Word: {''.join(self._chosen_word)}\n")
+            return False
 
-game = Hangman({"letters":8})
+    def exit_game(self):
+        self.print(f"You played {self._game_count} games and won {self._win_count} of them.\n")
+
+game = Hangman({"letters":8, "P1":"Python", "display_game":False, "python_sleep":0, "auto_play_count": 100})
 game.execute()
