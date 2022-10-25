@@ -1,86 +1,111 @@
-import csv
 from random import choice
 from ConsoleGame import *
 from HangmanStages import *
 from Words import *
 from string import ascii_uppercase
 
-class Hangman(cdkkConsoleGame):
+class HangmanGame(cdkkGame):
     def init(self):
-        self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]HANGMAN[/blue] \n'
-        self.instructions_str = "Guess one letter at a time."
-        self.input_pattern = "^[a-zA-Z]$"
-        self.input_error = "Please enter one letter.\n"
-        self._words = cdkkWords(word_length = self.get_config("letters"), common_words = True)
+        self.chosen_word = self.letters = self.guess = self.stage = self.allowed_words = None
+        self.allowed_words = cdkkWords(word_length = self.get_config("letters", 6), common_words = True)
         return True
 
-    def read_game_config(self):
-        super().read_game_config()
+    def start(self):
+        super().start()
+        self.chosen_word = list(self.allowed_words.random_word())
+        self.letters = []
+        self.guess = list(" " * len(self.chosen_word))
+        self.stage = 0
 
-    def start_game(self):
-        super().start_game()
-        self._chosen_word = list(self._words.random_word())
-        self._letters = []
-        self._guess = list(" " * len(self._chosen_word))
-        self._stage = 0
+    def check(self, turn):
+        turn_ok = turn in ascii_uppercase
+        if turn_ok and turn in self.letters:
+            turn_ok = False
+        return turn_ok
 
-    def process_input(self):
-        self.user_input = self.user_input.upper()
-        return super().process_input()
+    def update(self, turn):
+        correct_guess = False
+        for i, letter in enumerate(self.chosen_word):
+            if letter == turn:
+                self.guess[i] = letter
+                correct_guess = True
+        self.letters.append(turn)
+        if not correct_guess:
+            self.stage += 1
 
-    def valid_input(self):
-        if self.user_input in self._letters:
-            self.print(f"You've used that letter already.\n")
-            return False
-        return True
+        # Update game status
+        if (self.guess == self.chosen_word):
+            # Player won
+            self.status = self.current_player
+        elif (self.stage == 7):
+            self.status = 99  # Player lost
 
-    def calculate_answer(self):
+# ----------------------------------------
+
+class HangmanPyPlayer(cdkkPyPlayer):
+    def calculate_turn(self, game):
         # Randomly guess letters, checking that they haven't been used before
         answer = ''
         while answer == '':
             answer = choice(ascii_uppercase)
-            if answer in self._letters:
+            if not game.check(answer):
                 answer = ''
 
         return answer
 
-    def update(self):
-        super().update()
-        correct_guess = False
-        for i, letter in enumerate(self._chosen_word):
-            if letter == self.user_input:
-                self._guess[i] = letter
-                correct_guess = True
-        self._letters.append(self.user_input)
-        if not correct_guess:
-            self._stage += 1
+# ----------------------------------------
 
-    def display(self, first_time = False):
-        if not first_time:
-            self.console.clear()
-        self.print(hangman_stages[self._stage])
-        display_guess = list(" " * len(self._guess) * 2)
-        for i in range(len(self._guess)):
-            if self._guess[i] == ' ':
+class Hangman(cdkkConsoleGame):
+    default_config = {
+        "process_to_upper": True
+    }
+
+    def __init__(self, init_config=None):
+        super().__init__(Hangman.default_config)
+        self.update_config(init_config)
+        self._console.set_config("silent", self.get_config("silent", False))
+        self.game = HangmanGame(self.config)
+        self.pyplayer = HangmanPyPlayer()
+        self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]HANGMAN[/blue] \n'
+        self.instructions_str = "Guess one letter at a time."
+        self.turn_pattern = "^[a-zA-Z]$"
+        self.turn_pattern_error = "Please enter one letter.\n"
+        self.check_turn_error = "You've used that letter already.\n"
+
+    def display(self):
+        self._console.print(hangman_stages[self.game.stage])
+        display_guess = list(" " * len(self.game.guess) * 2)
+        for i in range(len(self.game.guess)):
+            if self.game.guess[i] == ' ':
                 display_guess[i*2] = "_"
             else:
-                display_guess[i*2] = self._guess[i]
-        self.print(f"\n  [red]{''.join(display_guess)}[/red]\n")
-        self.print(f"\n  Guesses so far: [blue]{' '.join(self._letters)}[/blue]\n")
+                display_guess[i*2] = self.game.guess[i]
+        self._console.print(f"\n  [red]{''.join(display_guess)}[/red]\n")
+        self._console.print(f"\n  Guesses so far: [blue]{' '.join(self.game.letters)}[/blue]\n")
 
-    def check_if_game_over(self):
-        return ((self._guess == self._chosen_word) or self._stage == 7)
-
-    def end_game(self):
-        if (self._guess == self._chosen_word):
-            self.print(f"You beat Hangman in {len(self._letters)} guesses.\n")
-            return True
+    def end_game(self, outcome, num_players):
+        if (outcome == 0 or outcome >= 99):
+            self._console.print(f"Hard luck ... you lost. Correct Word: {''.join(self.game.chosen_word)}\n")
         else:
-            self.print(f"Hard luck ... you lost. Correct Word: {''.join(self._chosen_word)}\n")
-            return False
+            if (num_players == 1):
+                self._console.print(f"You beat Hangman in {len(self.game.letters)} guesses.\n")
+            else:
+                self._console.print(f"{self.players[outcome-1]} beat Hangman in {len(self.game.letters)} guesses.\n")
 
     def exit_game(self):
-        self.print(f"You played {self._game_count} games and won {self._win_count} of them.\n")
+        self._console.print(self.games_wins_msg())
 
-game = Hangman({"letters":8, "P1":"Python", "display_game":False, "python_sleep":0, "auto_play_count": 100})
-game.execute()
+reg_game = Hangman()
+reg_game.execute()
+
+print("----------\n")
+
+vs_game = Hangman({"players":2, "P2":"Python"})
+vs_game.execute()
+
+print("----------\n")
+
+auto_game = Hangman({"letters":8, "P1":"Python", "silent":True, "auto_play_count": 1000})
+auto_game.execute()
+print(auto_game.games_wins_msg())
+

@@ -3,61 +3,75 @@ from random import choice
 from ConsoleGame import *
 from Words import *
 
-class Wordle(cdkkConsoleGame):
+class WordleGame(cdkkGame):
     def init(self):
-        self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]WORDLE[/blue] \n'
-        self.instructions_str = f"Guess words with {self.get_config('letters')} letters."
-        self.input_pattern = f"^[a-zA-Z]{{{self.get_config('letters')}}}$"
-        self.input_error = f"Please enter a valid {self.get_config('letters')}-letter word.\n"
-        self._common_words = cdkkWords(word_length = self.get_config("letters"), common_words = True)
-        self._all_words = cdkkWords(word_length = self.get_config("letters"), common_words = False)
+        self.common_words = cdkkWords(word_length = self.get_config("letters", 6), common_words = True)
+        self.allowed_words = cdkkWords(word_length = self.get_config("letters", 6), common_words = False)
         return True
 
-    def start_game(self):
-        super().start_game()
-        self._chosen_word = self._common_words.random_word()
-        # self._chosen_word = choice(self._word_options)
-        self._guesses = []
-        self._guesses_coloured = []
+    def start(self):
+        super().start()
+        self.chosen_word = self.common_words.random_word()
+        self.guesses = []
+        self.guesses_coloured = []
 
-    def process_input(self):
-        self.user_input = self.user_input.upper()
-        return super().process_input()
+    def check(self, turn):
+        return self.allowed_words.contains_word(turn)
 
-    def valid_input(self):
-        if self._all_words.contains_word(self.user_input):
-            return True
-        self.print(f"Please enter a valid word!!\n")
-        return False
-
-    def update(self):
-        super().update()
+    def update(self, turn):
         coloured = ""
-        for i, letter in enumerate(self.user_input):
-            if self._chosen_word[i] == self.user_input[i]:
+        for i, letter in enumerate(turn):
+            if letter == self.chosen_word[i]:
                 colour = "green"
-            elif letter in self._chosen_word:
+            elif letter in self.chosen_word:
                 colour = "yellow"
             else:
                 colour = "default"
             coloured += f"[{colour}]{letter}[/{colour}] "
-        self._guesses.append(self.user_input)
-        self._guesses_coloured.append(coloured)
+        self.guesses.append(turn)
+        self.guesses_coloured.append(coloured)
 
-    def display(self, first_time = False):
-        self.print(*self._guesses_coloured, sep="\n")
-        self.print("")
+        # Update game status
+        if (turn == self.chosen_word):
+            # Player won
+            self.status = self.current_player
+        elif (len(self.guesses) == self.get_config('guesses')):
+            # Player lost
+            self.status = 99
 
-    def check_if_game_over(self):
-        return (self.user_input == self._chosen_word) or (len(self._guesses) == self.get_config('guesses'))
+# ----------------------------------------
 
-    def end_game(self):
-        if (self.user_input == self._chosen_word):
-            self.print(f"You beat WORDLE {len(self._guesses)}/{self.get_config('guesses')}\n")
-            return True
+class Wordle(cdkkConsoleGame):
+    default_config = {
+        "process_to_upper": True
+    }
+
+    def __init__(self, init_config=None):
+        super().__init__(Wordle.default_config)
+        self.update_config(init_config)
+        self._console.set_config("silent", self.get_config("silent", False))
+        self.game = WordleGame(self.config)
+        self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]WORDLE[/blue] \n'
+        self.instructions_str = f"Guess words with {self.get_config('letters')} letters."
+        self.turn_pattern = f"^[a-zA-Z]{{{self.get_config('letters')}}}$"
+        self.turn_pattern_error = f"Please enter a valid {self.get_config('letters')}-letter word.\n"
+        self.check_turn_error = "Please enter a valid word.\n"
+
+    def display(self):
+        self._console.print(*self.game.guesses_coloured, sep="\n")
+        self._console.print("")
+
+    def end_game(self, outcome, num_players):
+        if (outcome == 0 or outcome >= 99):
+            self._console.print(f"Hard luck ... you used all {self.get_config('guesses')} guesses. Correct Word: {self.game.chosen_word}\n")
         else:
-            self.print(f"Hard luck ... you used all {self.get_config('guesses')} guesses. Correct Word: {self._chosen_word}\n")
-            return False
+            if (num_players == 1):
+                self._console.print(f"You beat WORDLE in {len(self.game.guesses)}/{self.get_config('guesses')} guesses.\n")
+            else:
+                self._console.print(f"{self.players[outcome-1]} beat WORDLE in {self.game.turn_count} guesses.\n")
 
-game = Wordle({"letters":5, "guesses":6, "players":1})
-game.execute()
+    def exit_game(self):
+        self._console.print(self.games_wins_msg())
+
+wordle = Wordle({"letters":5, "guesses":6, "players":2})
+wordle.execute()
