@@ -16,7 +16,10 @@ class WordleGame(cdkkGame):
         self.guesses_coloured = []
 
     def check(self, turn):
-        return self.allowed_words.contains_word(turn)
+        if (self.allowed_words.contains_word(turn)):
+            return ""
+        else:
+            return "Please enter a valid word"
 
     def update(self, turn):
         coloured = ""
@@ -55,7 +58,6 @@ class Wordle(cdkkConsoleGame):
         self.instructions_str = f"Guess words with {self.get_config('letters')} letters."
         self.turn_pattern = f"^[a-zA-Z]{{{self.get_config('letters')}}}$"
         self.turn_pattern_error = f"Please enter a valid {self.get_config('letters')}-letter word.\n"
-        self.check_turn_error = "Please enter a valid word.\n"
 
     def display(self):
         self._console.print(*self.game.guesses_coloured, sep="\n")

@@ -107,8 +107,8 @@ class cdkkGame(cdkkConfig):
         self.status = -1
 
     def check(self, turn):
-        # Return True if this turn is valid for the game
-        return True
+        # Return "" if this turn is valid. Otherwise an error message. 
+        return ("")
 
     def update(self, turn):
         # Run game logic, update game elements including status
@@ -150,7 +150,8 @@ class cdkkConsoleGame(cdkkConfig):
         # self._console.copy_config("silent", self, False)
 
         self.welcome_str = self.instructions_str = ""
-        self.turn_pattern = self.turn_pattern_error = self.check_turn_error = ""
+        self.turn_pattern = self.turn_pattern_error = ""
+        self.check_turn_error = "Invalid input: "
         self.player_names_str = "\nPlease enter each player's name."
         self.players = []
 
@@ -223,10 +224,10 @@ class cdkkConsoleGame(cdkkConfig):
 
     def check_turn(self):
         # Return True if input is valid for the game
-        valid_turn = self.game.check(self.next_turn)
-        if not valid_turn and self.check_turn_error != '':
-            self._console.print(self.check_turn_error)
-        return valid_turn
+        valid_msg = self.game.check(self.next_turn)
+        if valid_msg != "":
+            self._console.print(self.check_turn_error + valid_msg + "\n")
+        return (valid_msg == "")
 
     def read_python_turn(self):
         # Update display to look ike Python is responding

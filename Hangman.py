@@ -18,10 +18,10 @@ class HangmanGame(cdkkGame):
         self.stage = 0
 
     def check(self, turn):
-        turn_ok = turn in ascii_uppercase
-        if turn_ok and turn in self.letters:
-            turn_ok = False
-        return turn_ok
+        turn_msg = "" if (turn in ascii_uppercase) else "Only upper case ASCII letters are allowed"
+        if (turn_msg == "" and turn in self.letters):
+            turn_msg = "You've used that letter already"
+        return turn_msg
 
     def update(self, turn):
         correct_guess = False
@@ -48,7 +48,7 @@ class HangmanPyPlayer(cdkkPyPlayer):
         answer = ''
         while answer == '':
             answer = choice(ascii_uppercase)
-            if not game.check(answer):
+            if game.check(answer) != "":
                 answer = ''
 
         return answer
@@ -70,7 +70,6 @@ class Hangman(cdkkConsoleGame):
         self.instructions_str = "Guess one letter at a time."
         self.turn_pattern = "^[a-zA-Z]$"
         self.turn_pattern_error = "Please enter one letter.\n"
-        self.check_turn_error = "You've used that letter already.\n"
 
     def display(self):
         self._console.print(hangman_stages[self.game.stage])
