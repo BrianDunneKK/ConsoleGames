@@ -1,13 +1,13 @@
-from random import choice
 from ConsoleGame import *
+from cdkkWords import Words
+from HangmanPyPlayer import *
 from HangmanStages import *
-from Words import *
-from string import ascii_uppercase
 
-class HangmanGame(cdkkGame):
+class HangmanGame(Game):
     def init(self):
+        super().init()
         self.chosen_word = self.letters = self.guess = self.stage = self.allowed_words = None
-        self.allowed_words = cdkkWords(word_length = self.get_config("letters", 6), common_words = True)
+        self.allowed_words = Words(word_length = self.config.get("letters", 6), common_words = True)
         return True
 
     def start(self):
@@ -35,37 +35,22 @@ class HangmanGame(cdkkGame):
 
         # Update game status
         if (self.guess == self.chosen_word):
-            # Player won
-            self.status = self.current_player
+            self.status = self.current_player  # Player won
         elif (self.stage == 7):
-            self.status = 99  # Player lost
-
-# ----------------------------------------
-
-class HangmanPyPlayer(cdkkPyPlayer):
-    def calculate_turn(self, game):
-        # Randomly guess letters, checking that they haven't been used before
-        answer = ''
-        while answer == '':
-            answer = choice(ascii_uppercase)
-            if game.check(answer) != "":
-                answer = ''
-
-        return answer
+            self.status = 99                   # Player lost
 
 # ----------------------------------------
 
 class Hangman(cdkkConsoleGame):
-    default_config = {
-        "process_to_upper": True
-    }
+    default_config = { "ConsoleGame": { "process_to_upper": True } }
 
-    def __init__(self, init_config=None):
-        super().__init__(Hangman.default_config)
-        self.update_config(init_config)
-        self._console.set_config("silent", self.get_config("silent", False))
-        self.game = HangmanGame(self.config)
+    def __init__(self, init_config={}):
+        super().__init__()
+        self.game = HangmanGame()
         self.pyplayer = HangmanPyPlayer()
+        self.update_configs(cdkkConsoleGame.default_config, Hangman.default_config, init_config)
+        self._console.config.copy("silent", self.config, False)
+
         self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]HANGMAN[/blue] \n'
         self.instructions_str = "Guess one letter at a time."
         self.turn_pattern = "^[a-zA-Z]$"
@@ -82,29 +67,40 @@ class Hangman(cdkkConsoleGame):
         self._console.print(f"\n  [red]{''.join(display_guess)}[/red]\n")
         self._console.print(f"\n  Guesses so far: [blue]{' '.join(self.game.letters)}[/blue]\n")
 
-    def end_game(self, outcome, num_players):
+    def end_game(self, outcome, players):
         if (outcome == 0 or outcome >= 99):
             self._console.print(f"Hard luck ... you lost. Correct Word: {''.join(self.game.chosen_word)}\n")
         else:
-            if (num_players == 1):
+            if (players == 1):
                 self._console.print(f"You beat Hangman in {len(self.game.letters)} guesses.\n")
             else:
                 self._console.print(f"{self.players[outcome-1]} beat Hangman in {len(self.game.letters)} guesses.\n")
 
     def exit_game(self):
-        self._console.print(self.games_wins_msg())
+        self._console.print(self.game_wins_msg())
 
 reg_game = Hangman()
-reg_game.execute()
+#reg_game.execute()
+#print("----------\n")
 
-print("----------\n")
+vs_game = Hangman({"Game":{"players":2}, "ConsoleGame":{"P2":"Python"}})
+#vs_game.execute()
+#print("----------\n")
 
-vs_game = Hangman({"players":2, "P2":"Python"})
-vs_game.execute()
+auto_cfg = {
+    "Game":{"letters":8}
+    ,"ConsoleGame":{"P1":"Python", "auto_play_count": 1000, "silent":True}
+    ,"PyPlayer":{"pystrategy":"random"}
+    } 
+auto_random = Hangman(auto_cfg)
+#auto_random.execute()
+#print(auto_random.game_wins_msg())
 
-print("----------\n")
-
-auto_game = Hangman({"letters":8, "P1":"Python", "silent":True, "auto_play_count": 1000})
-auto_game.execute()
-print(auto_game.games_wins_msg())
-
+freq_cfg = {
+    "Game":{"letters":8}
+    ,"ConsoleGame":{"P1":"Python", "auto_play_count": 100, "silent":True}
+    ,"PyPlayer":{"pystrategy":"frequency"}
+    } 
+auto_freq = Hangman(freq_cfg)
+auto_freq.execute()
+print(auto_freq.game_wins_msg())

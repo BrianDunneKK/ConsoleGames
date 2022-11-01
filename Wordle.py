@@ -1,13 +1,18 @@
-import csv
-from random import choice
 from ConsoleGame import *
-from Words import *
+from cdkkWords import Words
+from HangmanPyPlayer import *
+from HangmanStages import *
 
-class WordleGame(cdkkGame):
+class WordleGame(Game):
     def init(self):
-        self.common_words = cdkkWords(word_length = self.get_config("letters", 6), common_words = True)
-        self.allowed_words = cdkkWords(word_length = self.get_config("letters", 6), common_words = False)
+        super().init()
+        self.common_words = Words(word_length = self.length, common_words = True)
+        self.allowed_words = Words(word_length = self.length, common_words = False)
         return True
+
+    @property
+    def length(self):
+        return self.config.get("letters", 6)
 
     def start(self):
         super().start()
@@ -38,42 +43,41 @@ class WordleGame(cdkkGame):
         if (turn == self.chosen_word):
             # Player won
             self.status = self.current_player
-        elif (len(self.guesses) == self.get_config('guesses')):
+        elif (len(self.guesses) == self.max_turns):
             # Player lost
             self.status = 99
 
 # ----------------------------------------
 
 class Wordle(cdkkConsoleGame):
-    default_config = {
-        "process_to_upper": True
-    }
+    default_config = { "ConsoleGame": { "process_to_upper": True } }
 
     def __init__(self, init_config=None):
-        super().__init__(Wordle.default_config)
-        self.update_config(init_config)
-        self._console.set_config("silent", self.get_config("silent", False))
-        self.game = WordleGame(self.config)
+        super().__init__()
+        self.game = WordleGame()
+        self.update_configs(cdkkConsoleGame.default_config, Wordle.default_config, init_config)
+        self._console.config.copy("silent", self.config, False)
+
         self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]WORDLE[/blue] \n'
-        self.instructions_str = f"Guess words with {self.get_config('letters')} letters."
-        self.turn_pattern = f"^[a-zA-Z]{{{self.get_config('letters')}}}$"
-        self.turn_pattern_error = f"Please enter a valid {self.get_config('letters')}-letter word.\n"
+        self.instructions_str = f"Guess words with {self.game.length} letters."
+        self.turn_pattern = f"^[a-zA-Z]{{{self.game.length}}}$"
+        self.turn_pattern_error = f"Please enter a valid {self.config.get('letters')}-letter word.\n"
 
     def display(self):
         self._console.print(*self.game.guesses_coloured, sep="\n")
         self._console.print("")
 
-    def end_game(self, outcome, num_players):
+    def end_game(self, outcome, players):
         if (outcome == 0 or outcome >= 99):
-            self._console.print(f"Hard luck ... you used all {self.get_config('guesses')} guesses. Correct Word: {self.game.chosen_word}\n")
+            self._console.print(f"Hard luck ... you used all {self.game.counts['turns']} guesses. Correct Word: {self.game.chosen_word}\n")
         else:
-            if (num_players == 1):
-                self._console.print(f"You beat WORDLE in {len(self.game.guesses)}/{self.get_config('guesses')} guesses.\n")
+            if (players == 1):
+                self._console.print(f"You beat WORDLE in {len(self.game.guesses)}/{self.game.max_turns} guesses.\n")
             else:
-                self._console.print(f"{self.players[outcome-1]} beat WORDLE in {self.game.turn_count} guesses.\n")
+                self._console.print(f"{self.players[outcome-1]} beat WORDLE in {self.game.counts['turns']} guesses.\n")
 
     def exit_game(self):
-        self._console.print(self.games_wins_msg())
+        self._console.print(self.game_wins_msg())
 
-wordle = Wordle({"letters":5, "guesses":6, "players":2})
+wordle = Wordle({"Game":{"letters":5, "max_turns":6}})
 wordle.execute()
