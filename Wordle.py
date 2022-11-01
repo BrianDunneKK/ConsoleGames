@@ -64,6 +64,7 @@ class Wordle(cdkkConsoleGame):
         self.turn_pattern_error = f"Please enter a valid {self.config.get('letters')}-letter word.\n"
 
     def display(self):
+        super().display()
         self._console.print(*self.game.guesses_coloured, sep="\n")
         self._console.print("")
 

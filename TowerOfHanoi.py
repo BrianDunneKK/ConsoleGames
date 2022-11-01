@@ -59,6 +59,7 @@ class TowerOfHanoi(cdkkConsoleGame):
         return str
 
     def display(self):
+        super().display()
         self._console.print('\n')
         for i in range(self.game.disks + 1):
             for j in range(3):
@@ -78,9 +79,14 @@ class TowerOfHanoi(cdkkConsoleGame):
     def end_game(self, outcome, players):
         self._console.print(f"You beat Tower of Hanoi in {self.game.counts['turns']} steps.\n")
 
-#hanoi = TowerOfHanoi({"Game":{"disks":3}})
-#hanoi.execute()
+# ----------------------------------------
 
-hanoi_auto = TowerOfHanoi({"Game":{"disks":3}, "ConsoleGame":{"P1":"Python"}})
+hanoi = TowerOfHanoi({"Game":{"disks":3}})
+hanoi.execute()
+
+hanoi_cfg = {
+    "Game": {"disks":5}
+    ,"ConsoleGame": {"P1":"Python", "python_sleep":0.5, "exit_at_end": True, "cls_pre_display": True}
+    }
+hanoi_auto = TowerOfHanoi(hanoi_cfg)
 hanoi_auto.execute()
-

@@ -43,6 +43,7 @@ class cdkkConsoleGame:
             ,"python_sleep": 1         # Time to sleep to simlaute Python input
             ,"exit_at_end": False      # True = Exit when the game ends; False = Ask to play again
             ,"auto_play_count": 0      # Number of games to play automatically (if asked)
+            ,"cls_pre_display": False  # True = Clear the screen before calling display()
         }
     }
 
@@ -77,7 +78,7 @@ class cdkkConsoleGame:
 
     def welcome(self):
         if self.welcome_str != '':
-            self._console.clear_console()
+            self._console.clear()
             self._console.print(self.welcome_str)
 
     def instructions(self):
@@ -159,7 +160,8 @@ class cdkkConsoleGame:
 
     def display(self):
         # Display the current version of the game
-        pass
+        if self.config.get("cls_pre_display", False):
+            self._console.clear()
 
     def check_if_game_over(self):
         # Return True if the game is over

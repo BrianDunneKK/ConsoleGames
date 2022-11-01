@@ -5,24 +5,29 @@ from ConsoleGame import Game
 
 class TowerOfHanoiPyPlayer(cdkkPyPlayer):
     def init(self, game: Game):
-        # To Do: Calculate turns for more than 3 disks
-        self.turns = ["13", "12", "32", "13", "21", "23", "13"]
+        self.turns = self.solve(game.disks, 1, 3)
 
     def calculate_turn(self, game: Game):
         return self.turns[game.counts["turns"]-1]
 
-    def random(self, game):
-        # Randomly guess letters, checking that they haven't been used before
-        answer = ''
-        while answer == '':
-            answer = choice(ascii_uppercase)
-            if game.check(answer) != "":
-                answer = ''
+    def solve(self, count: int, from_peg: int, to_peg: int):
+        from_to = f"{from_peg}{to_peg}"
+        if count == 1:
+            soln = [from_to]
+        else:
+            match from_to:
+                case "23" | "32": third_peg = 1
+                case "13" | "31": third_peg = 2
+                case "12" | "21": third_peg = 3
+            soln = self.solve(count-1, from_peg, third_peg)
+            soln.append(from_to)
+            soln.extend(self.solve(count-1, third_peg, to_peg))
+        return soln
 
-        return answer
 
-    def frequency(self, game: Game):
-        # Frequency analysis
-        freq = game.allowed_words.frequency()
-        freq = [letter for letter in freq if not (letter in game.letters)]
-        return freq[0]
+# ----------------------------------------
+
+if __name__ == '__main__':
+    pp = TowerOfHanoiPyPlayer()
+    print(pp.solve(4, 1, 3))
+

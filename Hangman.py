@@ -57,6 +57,7 @@ class Hangman(cdkkConsoleGame):
         self.turn_pattern_error = "Please enter one letter.\n"
 
     def display(self):
+        super().display()
         self._console.print(hangman_stages[self.game.stage])
         display_guess = list(" " * len(self.game.guess) * 2)
         for i in range(len(self.game.guess)):
