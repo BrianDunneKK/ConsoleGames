@@ -38,7 +38,7 @@ class TowerOfHanoi(cdkkConsoleGame):
     default_config = {}
     styles = ["dark_orange3", "red", "yellow", "blue", "violet", "green"]
 
-    def __init__(self, init_config=None):
+    def __init__(self, init_config={}):
         super().__init__()
         self.game = TowerOfHanoiGame()
         self.pyplayer = TowerOfHanoiPyPlayer()

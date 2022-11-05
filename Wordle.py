@@ -1,7 +1,5 @@
 from ConsoleGame import *
 from cdkkWords import Words
-from HangmanPyPlayer import *
-from HangmanStages import *
 
 class WordleGame(Game):
     def init(self):
@@ -52,7 +50,7 @@ class WordleGame(Game):
 class Wordle(cdkkConsoleGame):
     default_config = { "ConsoleGame": { "process_to_upper": True } }
 
-    def __init__(self, init_config=None):
+    def __init__(self, init_config={}):
         super().__init__()
         self.game = WordleGame()
         self.update_configs(cdkkConsoleGame.default_config, Wordle.default_config, init_config)
