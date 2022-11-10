@@ -29,8 +29,8 @@ class cdkkPyPlayer:
     def init(self, game:Game):
         pass
 
-    def calculate_turn(self, game:Game):
-        pass
+    def calculate_turn(self, game:Game) -> str:
+        return ""
 
 
 # ----------------------------------------
@@ -122,6 +122,9 @@ class cdkkConsoleGame:
         if self.players[self.game.current_player-1].upper() == "PYTHON":
             self._console.print(msg, end = '')
             return self.read_python_turn()
+        elif self.players[self.game.current_player-1].upper() == "BANK":
+            self.python_sleep()
+            return "BANK"
         else:
             return Prompt.ask(msg)
 
@@ -146,11 +149,14 @@ class cdkkConsoleGame:
             self._console.print(self.check_turn_error + valid_msg + "\n")
         return (valid_msg == "")
 
+    def python_sleep(self):
+        if self.config.get("python_sleep") > 0 and not self.config.get("silent", False):
+            time.sleep(self.config.get("python_sleep"))
+
     def read_python_turn(self):
         # Update display to look ike Python is responding
         answer = self.pyplayer.calculate_turn(self.game)
-        if self.config.get("python_sleep") > 0 and not self.config.get("silent", False):
-            time.sleep(self.config.get("python_sleep"))
+        self.python_sleep()
         self._console.print(answer)
         return answer
 

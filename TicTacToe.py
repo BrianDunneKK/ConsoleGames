@@ -5,8 +5,7 @@ class TicTacToeGame(Game):
     def init(self):
         self.players = 2
         super().init()
-        self.board = Board(3,3)
-        self.board.symbols({0:".", 1:"X", 2:"O", -1:"?"})
+        self.board = Board(3,3, {0:".", 1:"X", 2:"O", -1:"?"})
         return True
 
     def start(self):
@@ -18,7 +17,7 @@ class TicTacToeGame(Game):
         if x == -1:
             return "Please enter a valid square using the format 'col,row'"
         else:
-            if self.board.get(x, y, as_symbol=False) != 0:
+            if self.board.get(x, y) != 0:
                 return "Please enter a square using the format 'col,row'"
             else:
                 return ""
