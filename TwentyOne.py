@@ -1,5 +1,3 @@
-# To Do: Change "code + 100" to hidden context
-
 from ConsoleGame import *
 from cdkkBoard import Board
 from cdkkGamePiece import GamePiece, GamePieceSet, Card
@@ -14,9 +12,11 @@ class CardTwentyOne(Card):
 class HandTwentyOne(GamePieceSet):
     @property
     def total(self):
-        total0 = sum(self.values)
-        return total0
-
+        total = sum(self.values)
+        if (1 in self.values) and total <= 11:
+            total += 10
+        return total
+        
 # ----------------------------------------
 
 class BoardTwentyOne(Board):
@@ -29,6 +29,8 @@ class TwentyOneGame(Game):
     def init(self):
         super().init()
         self.board = BoardTwentyOne(10,1)
+        self.scores = {}
+        self.ready = {}
         return True
 
     def start(self):
@@ -36,39 +38,58 @@ class TwentyOneGame(Game):
         self.board.clear_all()
         self.twist("P1")
         self.twist("P1")
-        self.twist("Bank", 100, from_left = False)
-        self.twist("Bank", 100, from_left = False)
+        self.twist("Bank", hidden = True, from_left = False)
+        self.twist("Bank", hidden = True, from_left = False)
+        self.calc_scores()
+        self.ready["P1"] = False
+        self.ready["Bank"] = False
         self.next_after_update = False
 
-    def twist(self, player: str, code_inc: int = 0, from_left: bool = True):
+    def calc_scores(self) -> None:
+        p1_hand = HandTwentyOne(self.board.filter_pieces({"player":"P1"}))
+        bank_hand = HandTwentyOne(self.board.filter_pieces({"player":"Bank"}))
+        self.scores["P1"] = p1_hand.total
+        self.scores["Bank"] = bank_hand.total
+
+    def twist(self, player: str, hidden: bool = False, from_left: bool = True):
         hand = HandTwentyOne(self.board.filter_pieces({"player":player}))
         card = CardTwentyOne(random_card = True, context = {"player":player})
-        card.set(code_inc + card.code)
+        card.set(card.code, context = {"hidden": hidden})
         offset = hand.count if from_left else (self.board.xsize - hand.count - 1)
         self.board.set(offset, 0, piece = card)
 
     def update(self, turn):
         self.next_after_update = False
+        self.calc_scores()
+
         if self.current_player == 1:
             if turn == 'T':
                 self.twist("P1")
-                hand = HandTwentyOne(self.board.filter_pieces({"player":"P1"}))
-                print(f"Total = {hand.total}")
             else:
+                self.ready["P1"] = True
                 card = self.board.get_piece(9, 0)
-                card.set(card.code - 100)
+                card.context["hidden"] = False
                 card = self.board.get_piece(8, 0)
-                card.set(card.code - 100)
+                card.context["hidden"] = False
                 self.next_after_update = True
         else:
-            self.twist("Bank", from_left = False)
+            if self.scores["Bank"] < self.scores["P1"] or self.scores["Bank"] <= 14:
+                self.twist("Bank", from_left = False)
+            else:
+                self.ready["Bank"] = True
 
         # Update game status
-        hand = HandTwentyOne(self.board.filter_pieces({"player":"P1"}))
-        if (hand.total > 21):
+        self.calc_scores()
+        if (self.scores["P1"] > 21):
+            self.status = 100                    # Player lost
+        elif (self.scores["Bank"] > 21):
+            self.status = 1                      # Player won
+        elif self.ready["P1"] and self.scores["Bank"] > self.scores["P1"]: 
             self.status = 99                     # Player lost
-        elif self.counts["turns"] > 7:
-            self.status = self.current_player    # Player won
+        elif self.ready["Bank"] and self.scores["P1"] > self.scores["Bank"]: 
+            self.status = 1                      # Player won
+        elif self.ready["Bank"] and self.scores["Bank"] == self.scores["P1"]: 
+            self.status = 0                      # Draw
 
 # ----------------------------------------
 
@@ -86,15 +107,24 @@ class TwentyOne(cdkkConsoleGame):
         self.turn_pattern = f"^[tsTS]|BANK$"
         self.turn_pattern_error = "... Pattern error goes here ...\n"
 
+    def scores_str(self):
+        return f"Player = {self.game.scores['P1']},  Bank = {self.game.scores['Bank']}"
+
     def display(self):
         super().display()
         self._console.print(f"\n [bold][blue]P l a y e r[/blue] [red]{'B a n k':>105}[/red][/bold]")
         self._console.print(*self.game.board.strings(), sep="\n")
-        self._console.print("")
 
     def end_game(self, outcome, players):
-        if (outcome == 0 or outcome >= 99):
-            self._console.print(f"Hard luck ... you lost.\n")
+        match outcome:
+            case 0: msg = f"It was a draw ... {self.scores_str()}"
+            case 1: msg = f"You won! ... {self.scores_str()}"
+            case 100: msg = f"You're bust! ... Your score = {self.game.scores['P1']}"
+            case _: msg = f"You lost! ... {self.scores_str()}"
+        self._console.print(f"\n{msg}\n")
+
+    def exit_game(self):
+        self._console.print(self.game_wins_msg())
 
 TwentyOne = TwentyOne()
 TwentyOne.execute()
