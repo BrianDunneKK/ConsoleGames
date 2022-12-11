@@ -37,13 +37,14 @@ class WordleGame(Game):
         self.guesses.append(turn)
         self.guesses_coloured.append(coloured)
 
-        # Update game status
+    def update_status(self, turn) -> int:
         if (turn == self.chosen_word):
             # Player won
             self.status = self.current_player
         elif (len(self.guesses) == self.max_turns):
             # Player lost
             self.status = 99
+        return self.status
 
 # ----------------------------------------
 

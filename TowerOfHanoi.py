@@ -28,9 +28,10 @@ class TowerOfHanoiGame(Game):
         disk = self.pegs[int(turn[0]) - 1].pop()
         self.pegs[int(turn[1]) - 1].append(disk)
 
-        # Update game status
+    def update_status(self, turn) -> int:
         if (len(self.pegs[2]) == self.disks):
             self.status = self.current_player   # Game over
+        return self.status
 
 # ----------------------------------------
 

@@ -33,11 +33,12 @@ class HangmanGame(Game):
         if not correct_guess:
             self.stage += 1
 
-        # Update game status
+    def update_status(self, turn) -> int:
         if (self.guess == self.chosen_word):
             self.status = self.current_player  # Player won
         elif (self.stage == 7):
             self.status = 99                   # Player lost
+        return self.status
 
 # ----------------------------------------
 
@@ -81,8 +82,8 @@ class Hangman(cdkkConsoleGame):
         self._console.print(self.game_wins_msg())
 
 reg_game = Hangman()
-#reg_game.execute()
-#print("----------\n")
+reg_game.execute()
+print("----------\n")
 
 vs_game = Hangman({"Game":{"players":2}, "ConsoleGame":{"P2":"Python"}})
 #vs_game.execute()
@@ -94,8 +95,8 @@ auto_cfg = {
     ,"PyPlayer":{"pystrategy":"random"}
     } 
 auto_random = Hangman(auto_cfg)
-#auto_random.execute()
-#print(auto_random.game_wins_msg())
+auto_random.execute()
+print(auto_random.game_wins_msg())
 
 freq_cfg = {
     "Game":{"letters":8}

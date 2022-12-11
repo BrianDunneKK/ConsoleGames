@@ -26,12 +26,14 @@ class TicTacToeGame(Game):
         x, y, cmd = self.board.split_turn(turn)
         self.board.set(x, y, self.current_player)
 
-        # Update game status
+    def update_status(self, turn) -> int:
+        x, y, cmd = self.board.split_turn(turn)
         counts = self.board.in_a_row(x, y)
         if counts["max"] == 3:
             self.status = self.current_player    # Player won
         elif self.counts["turns"] == 9:
             self.status = 0    # Draw
+        return self.status
 
 # ----------------------------------------
 

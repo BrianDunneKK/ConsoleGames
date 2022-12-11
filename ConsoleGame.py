@@ -1,8 +1,13 @@
-# To Do: Add option to quit early
-# To Do: Add game as param to display() and end_game()
-# To Do: Add parameter types
-# To Do: Migrate to full MVC/MVVM 
-# https://realpython.com/python-dice-roll/
+# To Do ... Add "colour" as context to Console
+# To Do ... rename update() to take()
+# To Do ... update game loop diagram to include game model and split Game/ConsoleGame
+# To Do ... Add multi-turn logic to Game
+# To Do ... Add option to quit early
+# To Do ... Add game as param to display() and end_game()
+# To Do ... Add parameter types
+# To Do ... Migrate to full MVC/MVVM 
+# To Do ... Use "try: import rich except ModuleNotFoundError: print('Unable to load rich')" ... proceed without rich
+# To Do ... Implement Board.copy(another_board)
 
 import re
 import time
@@ -165,7 +170,8 @@ class cdkkConsoleGame:
         self.game.take(self.next_turn)
 
     def display(self):
-        # Display the current version of the game
+        # Display the game based on its current status
+        self.game.calc_scores()
         if self.config.get("cls_pre_display", False):
             self._console.clear()
 
