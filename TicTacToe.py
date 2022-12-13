@@ -1,5 +1,6 @@
 from ConsoleGame import *
 from cdkkBoard import Board
+from TicTacToePyPlayer import *
 
 class TicTacToeGame(Game):
     def init(self):
@@ -43,6 +44,7 @@ class TicTacToe(cdkkConsoleGame):
     def __init__(self, init_config={}):
         super().__init__()
         self.game = TicTacToeGame()
+        self.pyplayer = TicTacToePyPlayer()
         self.update_configs(cdkkConsoleGame.default_config, TicTacToe.default_config, init_config)
         self._console.config.copy("silent", self.config, False)
 
@@ -66,5 +68,10 @@ class TicTacToe(cdkkConsoleGame):
     def exit_game(self):
         self._console.print(self.game_wins_msg())
 
-TicTacToe = TicTacToe()
-TicTacToe.execute()
+ttt = TicTacToe()
+#ttt.execute()
+
+print("----------\n")
+
+vs_game = TicTacToe({"ConsoleGame":{"P2":"Python"}})
+vs_game.execute()

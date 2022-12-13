@@ -62,11 +62,11 @@ class TwentyOneGame(Game):
                 self.p1_player.deal(1, self.p1_context)
             else:
                 self.ready["P1"] = True
-                self.bank_context["hidden"] = False
+                self.bank_context["hidden"] = False    # Show bank's cards
                 self.bank_player.add_context(self.bank_context)
                 self.next_after_update = True
         else:
-            if self.bank_score < self.player_score or self.bank_score <= 14:
+            if self.bank_score < self.player_score:
                 self.bank_player.deal(1, self.bank_context)
             else:
                 self.ready["Bank"] = True

@@ -1,7 +1,6 @@
-# To Do ... Add "colour" as context to Console
+# To Do ... Add "colour" as context to Console. Add style-theme grid or stylize() or highlighter() to console.print()
 # To Do ... rename update() to take()
 # To Do ... update game loop diagram to include game model and split Game/ConsoleGame
-# To Do ... Add multi-turn logic to Game
 # To Do ... Add option to quit early
 # To Do ... Add game as param to display() and end_game()
 # To Do ... Add parameter types
