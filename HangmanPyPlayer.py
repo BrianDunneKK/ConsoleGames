@@ -4,10 +4,10 @@ from ConsoleGame import cdkkPyPlayer
 from ConsoleGame import Game
 
 class HangmanPyPlayer(cdkkPyPlayer):
-    def init(self, game: Game):
+    def init(self, game: Game) -> None:
         self.freq = game.allowed_words.frequency()
 
-    def calculate_turn(self, game: Game):
+    def calculate_turn(self, game: Game) -> str:
         strategy = self.config.get("pystrategy", "random")
         if (strategy.upper() == "RANDOM"):
             return self.random(game)
@@ -16,7 +16,7 @@ class HangmanPyPlayer(cdkkPyPlayer):
         else:
             return("Unknown strategy")
 
-    def random(self, game: Game):
+    def random(self, game: Game) -> str:
         # Randomly guess letters, checking that they haven't been used before
         answer = ''
         while answer == '':
@@ -26,7 +26,7 @@ class HangmanPyPlayer(cdkkPyPlayer):
 
         return answer
 
-    def frequency(self, game: Game):
+    def frequency(self, game: Game) -> str:
         # Frequency analysis
         freq = [letter for letter in self.freq if not (letter in game.letters)]
         return freq[0]

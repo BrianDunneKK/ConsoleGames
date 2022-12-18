@@ -2,29 +2,29 @@ from ConsoleGame import *
 from cdkkWords import Words
 
 class WordleGame(Game):
-    def init(self):
+    def init(self) -> bool:
         super().init()
         self.common_words = Words(word_length = self.length, common_words = True)
         self.allowed_words = Words(word_length = self.length, common_words = False)
         return True
 
     @property
-    def length(self):
-        return self.config.get("letters", 6)
+    def length(self) -> int:
+        return cast(int, self.config.get("letters", 6))
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.chosen_word = self.common_words.random_word()
         self.guesses = []
         self.guesses_coloured = []
 
-    def check(self, turn):
+    def check(self, turn) -> str:
         if (self.allowed_words.contains_word(turn)):
             return ""
         else:
             return "Please enter a valid word"
 
-    def update(self, turn):
+    def update(self, turn) -> None:
         coloured = ""
         for i, letter in enumerate(turn):
             if letter == self.chosen_word[i]:
@@ -51,7 +51,7 @@ class WordleGame(Game):
 class Wordle(cdkkConsoleGame):
     default_config = { "ConsoleGame": { "process_to_upper": True } }
 
-    def __init__(self, init_config={}):
+    def __init__(self, init_config={}) -> None:
         super().__init__()
         self.game = WordleGame()
         self.update_configs(cdkkConsoleGame.default_config, Wordle.default_config, init_config)
@@ -62,12 +62,12 @@ class Wordle(cdkkConsoleGame):
         self.turn_pattern = f"^[a-zA-Z]{{{self.game.length}}}$"
         self.turn_pattern_error = f"Please enter a valid {self.config.get('letters')}-letter word.\n"
 
-    def display(self):
+    def display(self) -> None:
         super().display()
         self._console.print(*self.game.guesses_coloured, sep="\n")
         self._console.print("")
 
-    def end_game(self, outcome, players):
+    def end_game(self, outcome, players) -> None:
         if (outcome == 0 or outcome >= 99):
             self._console.print(f"Hard luck ... you used all {self.game.counts['turns']} guesses. Correct Word: {self.game.chosen_word}\n")
         else:
@@ -76,7 +76,7 @@ class Wordle(cdkkConsoleGame):
             else:
                 self._console.print(f"{self.players[outcome-1]} beat WORDLE in {self.game.counts['turns']} guesses.\n")
 
-    def exit_game(self):
+    def exit_game(self) -> None:
         self._console.print(self.game_wins_msg())
 
 wordle = Wordle({"Game":{"letters":5, "max_turns":6}})

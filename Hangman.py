@@ -4,26 +4,26 @@ from HangmanPyPlayer import *
 from HangmanStages import *
 
 class HangmanGame(Game):
-    def init(self):
+    def init(self) -> bool:
         super().init()
         self.chosen_word = self.letters = self.guess = self.stage = self.allowed_words = None
         self.allowed_words = Words(word_length = self.config.get("letters", 6), common_words = True)
         return True
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.chosen_word = list(self.allowed_words.random_word())
         self.letters = []
         self.guess = list(" " * len(self.chosen_word))
         self.stage = 0
 
-    def check(self, turn):
+    def check(self, turn) -> str:
         turn_msg = "" if (turn in ascii_uppercase) else "Only upper case ASCII letters are allowed"
         if (turn_msg == "" and turn in self.letters):
             turn_msg = "You've used that letter already"
         return turn_msg
 
-    def update(self, turn):
+    def update(self, turn) -> None:
         correct_guess = False
         for i, letter in enumerate(self.chosen_word):
             if letter == turn:
@@ -45,7 +45,7 @@ class HangmanGame(Game):
 class Hangman(cdkkConsoleGame):
     default_config = { "ConsoleGame": { "process_to_upper": True } }
 
-    def __init__(self, init_config={}):
+    def __init__(self, init_config={}) -> None:
         super().__init__()
         self.game = HangmanGame()
         self.pyplayer = HangmanPyPlayer()
@@ -57,7 +57,7 @@ class Hangman(cdkkConsoleGame):
         self.turn_pattern = "^[a-zA-Z]$"
         self.turn_pattern_error = "Please enter one letter.\n"
 
-    def display(self):
+    def display(self) -> None:
         super().display()
         self._console.print(hangman_stages[self.game.stage])
         display_guess = list(" " * len(self.game.guess) * 2)
@@ -69,7 +69,7 @@ class Hangman(cdkkConsoleGame):
         self._console.print(f"\n  [red]{''.join(display_guess)}[/red]\n")
         self._console.print(f"\n  Guesses so far: [blue]{' '.join(self.game.letters)}[/blue]\n")
 
-    def end_game(self, outcome, players):
+    def end_game(self, outcome, players) -> None:
         if (outcome == 0 or outcome >= 99):
             self._console.print(f"Hard luck ... you lost. Correct Word: {''.join(self.game.chosen_word)}\n")
         else:
@@ -78,7 +78,7 @@ class Hangman(cdkkConsoleGame):
             else:
                 self._console.print(f"{self.players[outcome-1]} beat Hangman in {len(self.game.letters)} guesses.\n")
 
-    def exit_game(self):
+    def exit_game(self) -> None:
         self._console.print(self.game_wins_msg())
 
 reg_game = Hangman()

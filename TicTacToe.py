@@ -9,11 +9,11 @@ class TicTacToeGame(Game):
         self.board = Board(3,3, {0:".", 1:"X", 2:"O", -1:"?"})
         return True
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.board.clear_all()
 
-    def check(self, turn: str):
+    def check(self, turn: str) -> str:
         x, y, cmd = self.board.split_turn(turn)
         if x == -1:
             return "Please enter a valid square using the format 'col,row'"
@@ -23,7 +23,7 @@ class TicTacToeGame(Game):
             else:
                 return ""
 
-    def update(self, turn):
+    def update(self, turn) -> None:
         x, y, cmd = self.board.split_turn(turn)
         self.board.set(x, y, self.current_player)
 
@@ -41,7 +41,7 @@ class TicTacToeGame(Game):
 class TicTacToe(cdkkConsoleGame):
     default_config = {}
 
-    def __init__(self, init_config={}):
+    def __init__(self, init_config={}) -> None:
         super().__init__()
         self.game = TicTacToeGame()
         self.pyplayer = TicTacToePyPlayer()
@@ -53,19 +53,20 @@ class TicTacToe(cdkkConsoleGame):
         self.turn_pattern = "^[1-3],[1-3]$"
         self.turn_pattern_error = "Please enter a valid square.\n"
 
-    def display(self):
+    def display(self) -> None:
         super().display()
         self._console.print("")
-        self._console.print(*self.game.board.strings(), sep="\n")
+        ttt_borders = self.game.board.rt_stylise(Board.borders_all1, style="yellow")
+        self._console.print(*self.game.board.richtext(borders=ttt_borders), sep="\n")
         self._console.print("")
 
-    def end_game(self, outcome, players):
-        if (outcome == 0 or outcome >= 99):
+    def end_game(self, outcome, players) -> None:
+        if (outcome == 0 or outcome >= 99): 
             self._console.print(f"Draw game\n")
         else:
             self._console.print(f"{self.players[outcome-1]} won.\n")
 
-    def exit_game(self):
+    def exit_game(self) -> None:
         self._console.print(self.game_wins_msg())
 
 ttt = TicTacToe()

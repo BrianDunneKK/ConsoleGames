@@ -2,17 +2,17 @@ from ConsoleGame import *
 from TowerOfHanoiPyPlayer import TowerOfHanoiPyPlayer
 
 class TowerOfHanoiGame(Game):
-    def init(self):
+    def init(self) -> bool:
         super().init()
         self.disks = int(self.config.get("disks"))
         self.pegs = [list(range(self.disks, 0, -1)), [], []]
         return True
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.pegs = [list(range(self.disks, 0, -1)), [], []]
 
-    def check(self, turn):
+    def check(self, turn) -> str:
         from_peg = int(turn[0]) - 1
         to_peg = int(turn[1]) - 1
         if (from_peg == to_peg):
@@ -24,7 +24,7 @@ class TowerOfHanoiGame(Game):
                 return ("You can't move a disk between these pegs")
         return ""
 
-    def update(self, turn):
+    def update(self, turn) -> None:
         disk = self.pegs[int(turn[0]) - 1].pop()
         self.pegs[int(turn[1]) - 1].append(disk)
 
@@ -39,7 +39,7 @@ class TowerOfHanoi(cdkkConsoleGame):
     default_config = {}
     styles = ["dark_orange3", "red", "yellow", "blue", "violet", "green"]
 
-    def __init__(self, init_config={}):
+    def __init__(self, init_config={}) -> None:
         super().__init__()
         self.game = TowerOfHanoiGame()
         self.pyplayer = TowerOfHanoiPyPlayer()
@@ -52,14 +52,14 @@ class TowerOfHanoi(cdkkConsoleGame):
         self.turn_pattern_error = "Please enter two digits.\n"
         self.check_turn_error = "Invalid combination: "
 
-    def disk(self, size, block = '█'):        # █ ▀ ▄ ▐ ▌
+    def disk(self, size, block = '█') -> str:        # █ ▀ ▄ ▐ ▌
         width_multiplier = 4
         stack_width = 3 + self.game.disks * width_multiplier
         width = min((size * width_multiplier + 1), stack_width)
         str = (block * width).center(stack_width)
         return str
 
-    def display(self):
+    def display(self) -> None:
         super().display()
         self._console.print('\n')
         for i in range(self.game.disks + 1):
@@ -77,7 +77,7 @@ class TowerOfHanoi(cdkkConsoleGame):
             self._console.print(self.disk(99), style = TowerOfHanoi.styles[0], end = '')
         self._console.print('\n')
 
-    def end_game(self, outcome, players):
+    def end_game(self, outcome, players) -> None:
         self._console.print(f"You beat Tower of Hanoi in {self.game.counts['turns']} steps.\n")
 
 # ----------------------------------------

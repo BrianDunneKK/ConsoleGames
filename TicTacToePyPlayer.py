@@ -3,7 +3,7 @@ from ConsoleGame import cdkkPyPlayer
 from ConsoleGame import Game
 
 class TicTacToePyPlayer(cdkkPyPlayer):
-    def calculate_turn(self, game: Game):
+    def calculate_turn(self, game: Game) -> str:
         options = []
         for y in range(game.board.ysize):
             for x in range(game.board.xsize):

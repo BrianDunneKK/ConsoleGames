@@ -3,16 +3,16 @@ from cdkkBoard import Board
 from cdkkGamePiece import GamePiece, Dice
 
 class YahtzeeBoard(Board):
-    def create_piece(self, code: int = 0, value: int = -1):
+    def create_piece(self, code: int = 0, value: int = -1) -> Dice:
         return Dice(code)
 
 class YahtzeeGame(Game):
-    def init(self):
+    def init(self) -> bool:
         super().init()
         self.board = YahtzeeBoard(5,1)
         return True
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.board.clear_all()
         for i in range(5):
@@ -24,7 +24,7 @@ class YahtzeeGame(Game):
 class Yahtzee(cdkkConsoleGame):
     default_config = {}
 
-    def __init__(self, init_config={}):
+    def __init__(self, init_config={}) -> None:
         super().__init__()
         self.game = YahtzeeGame()
         self.update_configs(cdkkConsoleGame.default_config, Yahtzee.default_config, init_config)
@@ -35,11 +35,11 @@ class Yahtzee(cdkkConsoleGame):
         self.turn_pattern = "^[1-5]$"
         self.turn_pattern_error = "... Pattern error goes here ...\n"
 
-    def display(self):
+    def display(self) -> None:
         super().display()
         self._console.print("")
-        self._console.print(*self.game.board.strings(), sep="\n")
+        self._console.print(*self.game.board.richtext(borders=Board.borders_sph2), sep="\n")
         self._console.print("")
 
-Yahtzee = Yahtzee()
-Yahtzee.execute()
+yahtzee = Yahtzee()
+yahtzee.execute()

@@ -1,6 +1,6 @@
 from ConsoleGame import *
 from cdkkGamePiece import Card, CardHand, CardDeck
-from cdkkBoard import CardTable, CardPlayer
+from cdkkBoard import CardTable, CardPlayer, Board
 
 # ----------------------------------------
 
@@ -13,18 +13,18 @@ class TwentyOneGame(Game):
     def bank_score(self) -> int:
         return self.scores[1]
 
-    def init(self):
+    def init(self) -> bool:
         super().init()
         self.table = CardTable(10,1)
         self.ready = {}
         self.deck = CardDeck()
-        self.p1_context = {"colour":"blue"}
-        self.bank_context = {"hidden": True, "colour":"red"}
+        self.p1_context = {"style":"blue"}
+        self.bank_context = {"hidden": True, "style":"red"}
         self.p1_player = CardPlayer(cards=CardHand(), table=self.table, deck=self.deck)
         self.bank_player = CardPlayer(cards=CardHand(), table=self.table, deck=self.deck, first_card=(9, 0), cards_dir=(-1, 0))
         return True
 
-    def start(self):
+    def start(self) -> None:
         super().start()
         self.table.clear_all()
         self.deck.reset(shuffle=True)
@@ -41,7 +41,7 @@ class TwentyOneGame(Game):
         self.ready["Bank"] = False
         self.next_after_update = False
 
-    def total21(self, hand):
+    def total21(self, hand) -> int:
         total = 0
         for v in hand.values:
             total += min(v, 10)
@@ -53,7 +53,7 @@ class TwentyOneGame(Game):
         self.set_score(0, self.total21(self.p1_player))
         self.set_score(1, self.total21(self.bank_player))
 
-    def update(self, turn):
+    def update(self, turn) -> None:
         self.next_after_update = False
         self.calc_scores()
 
@@ -93,7 +93,7 @@ class TwentyOneGame(Game):
 class TwentyOneApp(cdkkConsoleGame):
     default_config = { "Game":{"players":2}, "ConsoleGame":{"P2":"Bank", "process_to_upper": True } }
 
-    def __init__(self, init_config={}):
+    def __init__(self, init_config={}) -> None:
         super().__init__()
         self.game = TwentyOneGame()
         self.update_configs(cdkkConsoleGame.default_config, TwentyOneApp.default_config, init_config)
@@ -104,15 +104,15 @@ class TwentyOneApp(cdkkConsoleGame):
         self.turn_pattern = f"^[tsTS]|BANK$"
         self.turn_pattern_error = self.instructions_str
 
-    def scores_str(self):
+    def scores_str(self) -> str:
         return f"Player = {self.game.player_score},  Bank = {self.game.bank_score}"
 
-    def display(self):
+    def display(self) -> None:
         super().display()
         self._console.print(f"\n [bold][blue]P l a y e r[/blue] [red]{'B a n k':>105}[/red][/bold]")
-        self._console.print(*self.game.table.strings(), sep="\n")
+        self._console.print(*self.game.table.richtext(borders=Board.borders_sph2), sep="\n")
 
-    def end_game(self, outcome, players):
+    def end_game(self, outcome, players) -> None:
         match outcome:
             case 0: msg = f"It was a draw ... {self.scores_str()}"
             case 1: msg = f"You won! ... {self.scores_str()}"
@@ -120,7 +120,7 @@ class TwentyOneApp(cdkkConsoleGame):
             case _: msg = f"You lost! ... {self.scores_str()}"
         self._console.print(f"\n{msg}\n")
 
-    def exit_game(self):
+    def exit_game(self) -> None:
         self._console.print(self.game_wins_msg())
 
 twenty_one = TwentyOneApp()
