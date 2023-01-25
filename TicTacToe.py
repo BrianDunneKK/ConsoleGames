@@ -1,6 +1,6 @@
 from ConsoleGame import *
 from cdkkBoard import Board
-from TicTacToePyPlayer import *
+from TicTacToePyPlayer import TicTacToePyPlayer
 
 class TicTacToeGame(Game):
     def init(self):
@@ -13,33 +13,30 @@ class TicTacToeGame(Game):
         super().start()
         self.board.clear_all()
 
-    def check(self, turn: str) -> str:
-        x, y, cmd = self.board.split_turn(turn)
-        if x == -1:
-            return "Please enter a valid square using the format 'col,row'"
-        else:
-            if self.board.get(x, y) != 0:
-                return "Please enter a square using the format 'col,row'"
-            else:
-                return ""
+    def calc_options(self) -> list[str]:
+        self.options.clear()
+        blanks = self.board.filter_by_code(0)
+        for x,y in blanks:
+            self.options.append(self.board.to_gridref(x, y).upper())
+        return self.options
 
-    def update(self, turn) -> None:
-        x, y, cmd = self.board.split_turn(turn)
+    def take(self, turn) -> None:
+        x, y, cmd = self.board.from_gridref(turn)
         self.board.set(x, y, self.current_player)
 
     def update_status(self, turn) -> int:
-        x, y, cmd = self.board.split_turn(turn)
+        x, y, cmd = self.board.from_gridref(turn)
         counts = self.board.in_a_row(x, y)
         if counts["max"] == 3:
-            self.status = self.current_player    # Player won
+            self.status = self.current_player   # Player won
         elif self.counts["turns"] == 9:
-            self.status = 0    # Draw
+            self.status = 0                     # Draw
         return self.status
 
 # ----------------------------------------
 
 class TicTacToe(cdkkConsoleGame):
-    default_config = {}
+    default_config = { "ConsoleGame": { "process_to_upper": True } }
 
     def __init__(self, init_config={}) -> None:
         super().__init__()
@@ -49,15 +46,15 @@ class TicTacToe(cdkkConsoleGame):
         self._console.config.copy("silent", self.config, False)
 
         self.welcome_str = '\n [red]WELCOME[/red] [green]TO[/green] [blue]Tic Tac Toe[/blue] \n'
-        self.instructions_str = "Select your square using the format 'row,col'."
-        self.turn_pattern = "^[1-3],[1-3]$"
-        self.turn_pattern_error = "Please enter a valid square.\n"
+        self.instructions_str = "Select your square using a grid reference (for example 'a1')."
+        self.turn_pattern = "^[A-C][1-3]$"
+        self.turn_pattern_error = "Please enter a valid grid reference.\n"
 
     def display(self) -> None:
         super().display()
         self._console.print("")
-        ttt_borders = self.game.board.rt_stylise(Board.borders_all1, style="yellow")
-        self._console.print(*self.game.board.richtext(borders=ttt_borders), sep="\n")
+        ttt_borders = self.game.board.rt_stylise(Board.borders_single2, style="yellow")
+        self._console.print(*self.game.board.richtext(borders=ttt_borders, gridref = "bright_black"), sep="\n")
         self._console.print("")
 
     def end_game(self, outcome, players) -> None:

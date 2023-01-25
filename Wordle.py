@@ -24,7 +24,7 @@ class WordleGame(Game):
         else:
             return "Please enter a valid word"
 
-    def update(self, turn) -> None:
+    def take(self, turn) -> None:
         coloured = ""
         for i, letter in enumerate(turn):
             if letter == self.chosen_word[i]:

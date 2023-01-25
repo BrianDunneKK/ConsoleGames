@@ -1,4 +1,3 @@
-# To Do ... rename update() to take()
 # To Do ... update game loop diagram to include game model and split Game/ConsoleGame
 # To Do ... Add option to quit early
 # To Do ... Migrate to full MVC/MVVM 
@@ -41,13 +40,19 @@ class cdkkConsoleGame:
     default_config = {
         "Game": { "players":1 }
         ,"ConsoleGame": {
-            "process_to_upper": False  # True = Convert each turn to upper case
-            ,"python_sleep": 1         # Time to sleep to simlaute Python input
-            ,"exit_at_end": False      # True = Exit when the game ends; False = Ask to play again
-            ,"auto_play_count": 0      # Number of games to play automatically (if asked)
-            ,"cls_pre_display": False  # True = Clear the screen before calling display()
+            "process_to_upper": False   # True = Convert each turn to upper case
+            ,"process_xydir_map": False # True = Map an x-y-dir command to use NESW
+            ,"python_sleep": 1          # Time to sleep to simlaute Python input
+            ,"exit_at_end": False       # True = Exit when the game ends; False = Ask to play again
+            ,"auto_play_count": 0       # Number of games to play automatically (if asked)
+            ,"cls_pre_display": False   # True = Clear the screen before calling display()
         }
     }
+    dir_map_nesw = {
+        "U":"N", "R":"E", "D":"S", "L":"W",
+        "N":"N", "E":"E", "S":"S", "W":"W"
+    }
+
 
     def __init__(self, init_config:dict = {}) -> None:
         self.config = Config()
@@ -135,8 +140,16 @@ class cdkkConsoleGame:
         if self.next_turn == "?":
             self.instructions()
             return False
+
         if self.config.get("process_to_upper", False):
             self.next_turn = self.next_turn.upper()
+
+        if self.config.get("process_xydir_map", False):
+            xy = self.next_turn[0:2]
+            dir = self.next_turn[2:]
+            dir = cdkkConsoleGame.dir_map_nesw[dir]
+            self.next_turn = xy + dir
+
         if self.turn_pattern != '':
             regex_check = re.search(self.turn_pattern, self.next_turn)
             regex_check = (regex_check is not None)
@@ -163,10 +176,6 @@ class cdkkConsoleGame:
         self.python_sleep()
         self._console.print(answer)
         return answer
-
-    def update(self) -> None:
-        # Update game elements and run game logic
-        self.game.take(self.next_turn)
 
     def display(self) -> None:
         # Display the game based on its current status
@@ -216,6 +225,7 @@ class cdkkConsoleGame:
             self.read_names()
             self.start_game()
             self.display()
+            self.game.calc_options()
 
         while not self.game.game_over:
             while True:
@@ -224,8 +234,9 @@ class cdkkConsoleGame:
                     if self.check_turn():
                         break
 
-            self.update()
+            self.game.update(self.next_turn)
             self.display()
+            self.game.calc_options()
             if self.check_if_game_over():
                 self.end_game(self.game.status, self.game.players)
                 if self.check_if_play_again():

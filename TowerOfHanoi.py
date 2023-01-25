@@ -24,7 +24,7 @@ class TowerOfHanoiGame(Game):
                 return ("You can't move a disk between these pegs")
         return ""
 
-    def update(self, turn) -> None:
+    def take(self, turn) -> None:
         disk = self.pegs[int(turn[0]) - 1].pop()
         self.pegs[int(turn[1]) - 1].append(disk)
 

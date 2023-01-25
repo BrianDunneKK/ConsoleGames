@@ -53,7 +53,7 @@ class TwentyOneGame(Game):
         self.set_score(0, self.total21(self.p1_player))
         self.set_score(1, self.total21(self.bank_player))
 
-    def update(self, turn) -> None:
+    def take(self, turn) -> None:
         self.next_after_update = False
         self.calc_scores()
 

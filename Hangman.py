@@ -23,7 +23,7 @@ class HangmanGame(Game):
             turn_msg = "You've used that letter already"
         return turn_msg
 
-    def update(self, turn) -> None:
+    def take(self, turn) -> None:
         correct_guess = False
         for i, letter in enumerate(self.chosen_word):
             if letter == turn:
