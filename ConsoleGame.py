@@ -144,6 +144,9 @@ class cdkkConsoleGame:
         if self.config.get("process_to_upper", False):
             self.next_turn = self.next_turn.upper()
 
+        if self.config.get("process_to_lower", False):
+            self.next_turn = self.next_turn.lower()
+
         if self.config.get("process_xydir_map", False):
             xy = self.next_turn[0:2]
             dir = self.next_turn[2:]
