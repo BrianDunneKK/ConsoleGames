@@ -1,3 +1,5 @@
+Use cdkkConsoleGame instead!!
+
 # To Do ... update game loop diagram to include game model and split Game/ConsoleGame
 # To Do ... Add option to quit early
 # To Do ... Migrate to full MVC/MVVM 
@@ -201,7 +203,7 @@ class cdkkConsoleGame:
             return (ans == "Y")
 
     def end_game(self, outcome, players) -> None:
-        # Display end of game infomration, such as whether the player won or lost
+        # Display end of game information, such as whether the player won or lost
         # Outcome = 0 ... Draw. Outcome = 1+ ... Number of winning player
         pass
 
